@@ -40,6 +40,7 @@ The license of this code is as follows:
 #include <stdio.h>
 #include <errno.h>
 #include <string>
+#include <string.h> //Required for memset()
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -117,6 +118,7 @@ class Option
 
 bool InitSettings();
 bool readFile();
+bool launchSmash();
 const vector<string> explode(const string& s, const char& c);
 void printDebug(string clr, string str);
 bool fileOrFolderExists(string pathString);
@@ -157,6 +159,10 @@ int main(int argc, char **argv)
     consoleInit(GFX_TOP, &ct);
     consoleInit(GFX_BOTTOM, &cb);
 	consoleSelect(&ct);
+	
+	// We need these 2 buffers for APT_DoAppJump() later.
+	u8 param[0x300];
+	u8 hmac[0x20];
 	
 	//Matrix containing the name of each key. Useful for printing when a key is pressed
 	char keysNames[32][32] = {
@@ -235,6 +241,7 @@ int main(int argc, char **argv)
 			for (i = 0; i < 32; i++)
 			{
 				//Debugging information.
+				//TODO: Stop using this. Please.
 				if (kDown & BIT(i)) printf("%s down (Key %i)\n", keysNames[i], i);
 				if (kHeld & BIT(i)) printf("%s held (Key %i)\n", keysNames[i], i);
 				if (kUp & BIT(i)) printf("%s up\n", keysNames[i]);
@@ -459,8 +466,38 @@ bool applySettings()
 			
 		}
 	}
-	InitSettings();
+	launchSmash();
+	//No need to init if we're exiting anyway
+	//InitSettings();
 	
+}
+
+bool launchSmash()
+{
+	// We need these 2 buffers for APT_DoAppJump() later.
+	u8 param[0x300];
+	u8 hmac[0x20];
+	
+	// Clear both buffers
+	memset(param, 0, sizeof(param));
+	memset(hmac, 0, sizeof(hmac));
+
+	// Prepare for the app launch
+	/*
+	0x00040010 00022400 LL
+	Part 1 of the ID means it's a system title
+	Part 2 is the title ID
+	Part 3 I have no idea
+	http://3dsdb.com/ lists both parts 1 & 2 so you don't have to guess.
+	*/
+	//APT_PrepareToDoApplicationJump(0, 0x0004001000022400LL, 0); // *EUR* camera app title ID
+	APT_PrepareToDoApplicationJump(0, 0x00040000000EDF00LL, 0); //Launch USA smash 4
+	// Tell APT to trigger the app launch and set the status of this app to exit
+	APT_DoApplicationJump(param, sizeof(param), hmac);
+
+	printDebug(RED, "Failed to launch application. If you are seeing this, you need to install the CIA version of this launcher.");
+	//It's not supposed to reach this point, right?
+	return false;
 }
 
 bool moveSmashFolders()

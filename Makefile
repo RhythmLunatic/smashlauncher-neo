@@ -33,9 +33,10 @@ SOURCES		:=	source
 DATA		:=	data
 INCLUDES	:=	include
 #ROMFS		:=	romfs
-#APP_AUTHOR		:=	"Author"
-#APP_TITLE		:=	"Launcher"
-#APP_DESCRIPTION		:=	"Configure the game with the launcher."
+#Why won't it compile ._.
+#APP_AUTHOR	:=	"Rhythm Lunatic"
+#APP_TITLE	:=	"Launcher"
+#APP_DESCRIPTION	:=	"Configure the game with the launcher."
 
 #---------------------------------------------------------------------------------
 # options for code generation
@@ -194,6 +195,8 @@ endef
 
 -include $(DEPENDS)
 
+#compile to CIA
+makebanner := $(shell bannertool makebanner -i banner.png -a sramsd_coin.wav -o banner2.bin && echo "created banner.")
 #---------------------------------------------------------------------------------------
 endif
 #---------------------------------------------------------------------------------------
