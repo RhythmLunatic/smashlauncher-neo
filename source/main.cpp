@@ -201,7 +201,6 @@ int main(int argc, char **argv)
 	std::cout << help1;
 	std::cout << help2;
 	std::cout << help3;
-	std::cout << help4;
 	cout << "\x1b[4;0HCurrently selected modpack: " << desc << "\n";
 	
 	while (aptMainLoop())
